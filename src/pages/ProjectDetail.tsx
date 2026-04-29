@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, Play, Award } from "lucide-react";
 import { projects } from "@/data/projects";
 
 const ProjectDetail = () => {
