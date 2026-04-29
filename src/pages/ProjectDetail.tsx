@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, Play, Award } from "lucide-react";
 import { projects } from "@/data/projects";
 
 const ProjectDetail = () => {
@@ -75,17 +75,84 @@ const ProjectDetail = () => {
           </p>
         </motion.div>
 
-        {/* Video placeholder */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          className="glass-card rounded-sm aspect-video flex items-center justify-center cursor-pointer group"
-        >
-          <div className="w-16 h-16 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
-            <Play size={24} className="text-primary ml-1" />
-          </div>
-        </motion.div>
+        {/* Credits / Awards */}
+        {(project.director || project.awards?.length) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="grid md:grid-cols-2 gap-8 border-t border-border pt-12"
+          >
+            <div className="space-y-3">
+              {project.director && (
+                <div>
+                  <p className="text-xs tracking-[0.25em] uppercase text-muted-foreground font-display">Director</p>
+                  <p className="text-foreground mt-1">{project.director}</p>
+                </div>
+              )}
+              {project.cast && (
+                <div>
+                  <p className="text-xs tracking-[0.25em] uppercase text-muted-foreground font-display">Cast</p>
+                  <p className="text-foreground mt-1">{project.cast}</p>
+                </div>
+              )}
+            </div>
+            {project.awards?.length && (
+              <div>
+                <p className="text-xs tracking-[0.25em] uppercase text-muted-foreground font-display mb-3">Recognition</p>
+                <ul className="space-y-2">
+                  {project.awards.map((a) => (
+                    <li key={a} className="flex items-start gap-2 text-foreground">
+                      <Award size={16} className="text-primary mt-1 flex-shrink-0" />
+                      <span>{a}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Embedded clip — non-downloadable, restricted controls */}
+        {project.videoEmbedId && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+            className="space-y-4"
+          >
+            <h2 className="font-display text-2xl font-semibold">Clip</h2>
+            <div className="relative aspect-video rounded-sm overflow-hidden glass-card">
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src={`https://www.youtube-nocookie.com/embed/${project.videoEmbedId}?rel=0&modestbranding=1&playsinline=1&fs=0&iv_load_policy=3&disablekb=1`}
+                title={`${project.title} — clip`}
+                loading="lazy"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen={false}
+                referrerPolicy="strict-origin-when-cross-origin"
+                sandbox="allow-scripts allow-same-origin allow-presentation"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Clip embedded for preview only. Not available for download or external embedding.
+            </p>
+          </motion.div>
+        )}
+
+        {/* Fallback play tile when no clip */}
+        {!project.videoEmbedId && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+            className="glass-card rounded-sm aspect-video flex items-center justify-center cursor-pointer group"
+          >
+            <div className="w-16 h-16 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+              <Play size={24} className="text-primary ml-1" />
+            </div>
+          </motion.div>
+        )}
 
         {/* Stills gallery placeholder */}
         <motion.div

@@ -1,3 +1,5 @@
+import chamkilaPoster from "@/assets/chamkila-poster.jpg";
+
 export interface Project {
   id: string;
   title: string;
@@ -5,12 +7,33 @@ export interface Project {
   description: string;
   posterImage: string;
   videoPreview?: string;
+  videoEmbedId?: string;
   stills?: string[];
   credits?: string;
   category: string;
+  awards?: string[];
+  director?: string;
+  cast?: string;
 }
 
 export const projects: Project[] = [
+  {
+    id: "chamkila",
+    title: "Amar Singh Chamkila",
+    role: "Animation Supervisor | Storyboard & Character Design",
+    description:
+      "Directed by Imtiaz Ali, this Netflix film brings to life the legendary Punjabi singer Amar Singh Chamkila, portrayed by Diljit Dosanjh alongside Parineeti Chopra. A powerful exploration of an artist's craft versus the weight of society, the film blends live-action with stylized animated sequences that visualize Chamkila's inner world, music, and the cultural pulse of Punjab. As Animation Supervisor, I led storyboard development and character design for the animated segments — translating Imtiaz Ali's vision into expressive, emotionally charged visual storytelling.",
+    posterImage: chamkilaPoster,
+    videoEmbedId: "61pvxwm0z7o",
+    category: "Netflix Film",
+    director: "Imtiaz Ali",
+    cast: "Diljit Dosanjh, Parineeti Chopra",
+    awards: [
+      "Filmfare OTT Award — Best Film",
+      "Multiple International Awards for Direction & Music",
+      "A.R. Rahman — Original Score",
+    ],
+  },
   {
     id: "mighty-little-bheem",
     title: "Mighty Little Bheem",
