@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import profileImage from "@/assets/profile.jpg";
+import profileImage from "@/assets/sumit-profile.jpg";
 
 const AboutSection = () => {
   const ref = useRef(null);
@@ -23,8 +23,9 @@ const AboutSection = () => {
                 src={profileImage}
                 alt="Sumit Mandre - Animation Director"
                 className="w-full h-full object-cover"
+                style={{ objectPosition: "60% 20%" }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent" />
             </div>
             {/* Accent line */}
             <div className="absolute -left-4 top-8 w-px h-24 bg-primary/40" />

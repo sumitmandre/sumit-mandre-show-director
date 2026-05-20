@@ -1,62 +1,72 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause } from "lucide-react";
 
 interface HeroProps {
   isMuted: boolean;
   onAutoMute: () => void;
 }
 
+const SHOWREEL_ID = "O4gjv779n68";
+
 const HeroSection = ({ isMuted, onAutoMute }: HeroProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted;
-    }
-  }, [isMuted]);
-
+  // Auto-mute when scrolled past hero
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > window.innerHeight * 0.3) {
-        onAutoMute();
-      }
+      if (window.scrollY > window.innerHeight * 0.3) onAutoMute();
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [onAutoMute]);
 
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPaused(false);
-    } else {
-      videoRef.current.pause();
-      setIsPaused(true);
-    }
-  };
+  // Send mute/unmute commands to the YouTube iframe via postMessage
+  useEffect(() => {
+    if (!iframeRef.current?.contentWindow) return;
+    const fn = isMuted ? "mute" : "unMute";
+    iframeRef.current.contentWindow.postMessage(
+      JSON.stringify({ event: "command", func: fn, args: [] }),
+      "*"
+    );
+  }, [isMuted, ready]);
+
+  const params = new URLSearchParams({
+    autoplay: "1",
+    mute: "1",
+    controls: "0",
+    loop: "1",
+    playlist: SHOWREEL_ID,
+    playsinline: "1",
+    modestbranding: "1",
+    rel: "0",
+    iv_load_policy: "3",
+    disablekb: "1",
+    fs: "0",
+    enablejsapi: "1",
+  }).toString();
 
   return (
-    <section ref={sectionRef} className="relative h-screen w-full overflow-hidden">
-      {/* Video Background - using a cinematic gradient as placeholder */}
-      <div className="absolute inset-0 bg-background">
-        <div
-          className="absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse at 30% 50%, hsla(38,70%,55%,0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, hsla(220,60%,30%,0.1) 0%, transparent 50%)",
-          }}
+    <section ref={sectionRef} className="relative h-screen w-full overflow-hidden bg-background">
+      {/* Showreel background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <iframe
+          ref={iframeRef}
+          onLoad={() => setReady(true)}
+          src={`https://www.youtube-nocookie.com/embed/${SHOWREEL_ID}?${params}`}
+          title="Sumit Mandre — Showreel"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          referrerPolicy="strict-origin-when-cross-origin"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.78vh] h-[56.25vw] min-w-full min-h-full pointer-events-none"
         />
-        {/* Animated grain texture */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-        }} />
+        {/* Click-blocker to prevent any YT interaction */}
+        <div className="absolute inset-0" />
       </div>
 
-      {/* Hero gradient overlay */}
+      {/* Cinematic overlay */}
       <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
+      <div className="absolute inset-0 bg-background/40" />
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col justify-end pb-20 md:pb-32 px-6 md:px-10 max-w-7xl mx-auto">
@@ -77,18 +87,6 @@ const HeroSection = ({ isMuted, onAutoMute }: HeroProps) => {
             15+ years crafting international animation &amp; film projects across 2D, 3D, and live-action formats.
           </p>
         </motion.div>
-
-        {/* Play/Pause control */}
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          onClick={togglePlay}
-          className="absolute bottom-8 right-8 md:bottom-12 md:right-12 p-3 rounded-full border border-border bg-secondary/50 backdrop-blur-sm hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
-          aria-label={isPaused ? "Play" : "Pause"}
-        >
-          {isPaused ? <Play size={20} /> : <Pause size={20} />}
-        </motion.button>
       </div>
 
       {/* Scroll indicator */}
@@ -96,7 +94,7 @@ const HeroSection = ({ isMuted, onAutoMute }: HeroProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
       >
         <span className="text-muted-foreground text-xs tracking-widest uppercase">Scroll</span>
         <div className="w-px h-8 bg-gradient-to-b from-muted-foreground to-transparent" />
