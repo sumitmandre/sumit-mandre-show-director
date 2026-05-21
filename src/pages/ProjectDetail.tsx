@@ -113,35 +113,63 @@ const ProjectDetail = () => {
           </motion.div>
         )}
 
-        {/* Embedded clip — non-downloadable, restricted controls */}
-        {project.videoEmbedId && (
-          <motion.div
+        {/* Embedded clip(s) — non-downloadable, restricted controls */}
+        {(() => {
+          const ids = project.videoEmbedIds ?? (project.videoEmbedId ? [project.videoEmbedId] : []);
+          if (ids.length === 0) return null;
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="space-y-4"
+            >
+              <h2 className="font-display text-2xl font-semibold">{ids.length > 1 ? "Clips" : "Clip"}</h2>
+              <div className={ids.length > 1 ? "grid md:grid-cols-2 gap-4" : ""}>
+                {ids.map((vid) => (
+                  <div key={vid} className="relative aspect-video rounded-sm overflow-hidden glass-card">
+                    <iframe
+                      className="absolute inset-0 w-full h-full"
+                      src={`https://www.youtube-nocookie.com/embed/${vid}?rel=0&modestbranding=1&playsinline=1&fs=0&iv_load_policy=3&disablekb=1`}
+                      title={`${project.title} — clip`}
+                      loading="lazy"
+                      allow="autoplay; encrypted-media; picture-in-picture"
+                      allowFullScreen={false}
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      sandbox="allow-scripts allow-same-origin allow-presentation"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Clips embedded for preview only. Not available for download or external embedding.
+              </p>
+            </motion.div>
+          );
+        })()}
+
+        {/* External link tile when no embed (e.g. YouTube channel) */}
+        {!project.videoEmbedId && !project.videoEmbedIds && project.externalUrl && (
+          <motion.a
+            href={project.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.6 }}
-            className="space-y-4"
+            className="block glass-card rounded-sm aspect-video flex items-center justify-center group hover:border-primary/40 transition-colors"
           >
-            <h2 className="font-display text-2xl font-semibold">Clip</h2>
-            <div className="relative aspect-video rounded-sm overflow-hidden glass-card">
-              <iframe
-                className="absolute inset-0 w-full h-full"
-                src={`https://www.youtube-nocookie.com/embed/${project.videoEmbedId}?rel=0&modestbranding=1&playsinline=1&fs=0&iv_load_policy=3&disablekb=1`}
-                title={`${project.title} — clip`}
-                loading="lazy"
-                allow="autoplay; encrypted-media; picture-in-picture"
-                allowFullScreen={false}
-                referrerPolicy="strict-origin-when-cross-origin"
-                sandbox="allow-scripts allow-same-origin allow-presentation"
-              />
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                <Play size={24} className="text-primary ml-1" />
+              </div>
+              <span className="font-display text-sm text-muted-foreground group-hover:text-foreground">Watch on YouTube →</span>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Clip embedded for preview only. Not available for download or external embedding.
-            </p>
-          </motion.div>
+          </motion.a>
         )}
 
-        {/* Fallback play tile when no clip */}
-        {!project.videoEmbedId && (
+        {/* Fallback play tile when no clip and no external */}
+        {!project.videoEmbedId && !project.videoEmbedIds && !project.externalUrl && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
