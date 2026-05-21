@@ -43,13 +43,7 @@ const ProjectsSection = () => {
                   alt={project.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-
-                <div className="absolute top-3 left-3">
-                  <span className="text-[10px] tracking-widest uppercase font-display text-primary/90 bg-background/50 backdrop-blur-sm px-2.5 py-1 rounded-full border border-primary/20">
-                    {project.category}
-                  </span>
-                </div>
+                <div className="absolute inset-0 ring-1 ring-inset ring-border/40 group-hover:ring-primary/40 transition-colors duration-500" />
 
                 <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                   <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
@@ -58,6 +52,9 @@ const ProjectsSection = () => {
                 </div>
               </div>
 
+              <p className="text-[10px] tracking-[0.2em] uppercase text-primary/80 font-display mb-1.5">
+                {project.category}
+              </p>
               <h3 className="font-display text-base md:text-lg font-semibold tracking-tight group-hover:text-primary transition-colors leading-tight">
                 {project.title}
               </h3>

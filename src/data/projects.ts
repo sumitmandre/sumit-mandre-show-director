@@ -9,6 +9,14 @@ import pLupin from "@/assets/p-lupin-tales.jpg";
 import pCtrl from "@/assets/p-ctrl.jpg";
 import pIllustrations from "@/assets/p-illustrations.png";
 
+// Google Drive thumbnail helper — uses the public file ID
+const dt = (id: string, w = 1600) => `https://drive.google.com/thumbnail?id=${id}&sz=w${w}`;
+
+export interface ImageSection {
+  heading?: string;
+  images: string[];
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -22,6 +30,11 @@ export interface Project {
   awards?: string[];
   director?: string;
   cast?: string;
+  stills?: string[];
+  /** When set, render these image sections instead of stills+video (used for illustrations / cartoons-only). */
+  imageSections?: ImageSection[];
+  /** When true, hide the video section entirely (e.g. illustrations). */
+  hideVideo?: boolean;
 }
 
 export const projects: Project[] = [
@@ -41,6 +54,15 @@ export const projects: Project[] = [
       "Multiple international wins for Direction & Music",
       "Original Score by A.R. Rahman",
     ],
+    stills: [
+      "1iJVtU_35WZirSz4x8V--EAUl2mmtblP7",
+      "1l88yrOuwd27XF1dSa0XVt6h96BUcIzLs",
+      "1N9mio4KGo5yjoUC0Lw1BEVQq4d350pjG",
+      "1uV6e_VaH1dqWvYFDLwfur-z5XlRHiKhg",
+      "1uhX4IgVpWRvFRz-sGyVV7QDM7TIabnnX",
+      "1w0B0p9czC7XE9-ZYrm6gHZymUtaRfdBm",
+      "1u-2nbNlLDFnOPpI1BmvNWwjKSGbPawsP",
+    ].map((id) => dt(id)),
   },
   {
     id: "indira-emergency",
@@ -51,6 +73,17 @@ export const projects: Project[] = [
     posterImage: pIndira,
     videoEmbedId: "kRRaHQI8oKo",
     category: "Documentary Series",
+    stills: [
+      "1WxorKpXKKOqAWwTEslDND1V2MhWzthXz",
+      "1imbE7_wrnc-mq_WHRpxR-j_XfR0HfPcg",
+      "1r-tjDnBEpC1DfRFgjFy8qyDwc5lbz5Ro",
+      "1mnpmNbN9x832BuG2F04r2Mrc3z74U-Z0",
+      "1PKRSlsjyAS3yxBVzIT7EkkDFOJRBnZer",
+      "1kjyYRBhjafhuqYgeCWFs1cuqMwIuneOu",
+      "1oZ9WfX9vLmLacrHUhswtRYToJAa5nIiw",
+      "19GBlbj_EfOpt97uxotaF1yrW2Ue6T_-s",
+      "1Mv8LBiLMegPD6qqJpBr1zHf8Fupw2nvp",
+    ].map((id) => dt(id)),
   },
   {
     id: "ctrl",
@@ -80,6 +113,12 @@ export const projects: Project[] = [
       "Best Web Series — News18 Showsha Reel Awards 2026",
       "Multiple wins for direction, writing, and acting",
     ],
+    stills: [
+      "11t_5qXe5jTNpNDPQ5gr6ju5whdv-COTy",
+      "1bRpCf4hc1NzyNivvBKgZlpY8Soxs2aJH",
+      "14eKgO5e0WDjKHWhNjD3LJ93HWQRuytSp",
+      "1kDyLIDCEEtwOp440TgeCTqFbUbLJOX6A",
+    ].map((id) => dt(id)),
   },
   {
     id: "heirloom",
@@ -96,6 +135,20 @@ export const projects: Project[] = [
       "MIFA, Annecy Film Market",
       "Film Bazaar, IFFI Goa 2023",
     ],
+    stills: [
+      "1hF5Pa3fSewWpwSskUyxBfeaXFrmZi-Gv",
+      "18dgCNcWI6Hapye0KO9Qv0bcp2fTxDptz",
+      "16gAaapuyRX_-hLPIPY8OlsB0-gtCSwO5",
+      "1zrBKxyv9dMFwBtwDAaMvMOq7NQpCJqAP",
+      "18-Iil00ivsZ59klE52Hq08PFRTjc-FUp",
+      "1AoOCpxAKDUWtBxwoy1CyvrP_R4sG5Wcg",
+      "1jusroIRIExz_ltNwfjxc1uW23x9-wP1b",
+      "1VIlLmYWGq-wCfyVgoozdrKXTR2pPFdTe",
+      "152gMdmEfuHP7eyYdNnIlHeCgmlSBah7U",
+      "1RMps-NCUttPcGF6ehuS7cPa9iyrJbI9w",
+      "1iZ0CZsFz6bCHrshzUleFOlyBxnVcUdPr",
+      "1_UXUmZf670MtyentllG-ZJzQv76hmLQi",
+    ].map((id) => dt(id)),
   },
   {
     id: "lupin-tales",
@@ -106,6 +159,13 @@ export const projects: Project[] = [
     posterImage: pLupin,
     externalUrl: "https://youtube.com/@lupinstales",
     category: "International Series",
+    stills: [
+      "1LcRaJp4gjFxs7eCTW6ZKD4uoDr_V_O_F",
+      "15SJ0vgh_aKDQ8VnqUK74r8QDsims3pCs",
+      "12L1SN1SsqivWPaP-4yJ6H8ibRGSWsqIV",
+      "1TWMtpBjriUA3dnMb7T8_SZD2tBIJb5Jw",
+      "1dKmED58TJySfoZeMk2WF-mpCyG6Jac3Y",
+    ].map((id) => dt(id)),
   },
   {
     id: "pubg-bgmi",
@@ -117,6 +177,16 @@ export const projects: Project[] = [
     videoEmbedId: "y1lYCrbKMHM",
     category: "Anime Promo",
     awards: ["20M+ YouTube views (promo)", "92M+ views, 474K likes (full release)"],
+    stills: [
+      "1Wf8-3CfACwvUwmpf1zK5lCWidwpXUwaw",
+      "1qUzqlb0MVJ4nwCzD6vM6Q12OGTtyIfzV",
+      "1fWk6kOhu7O-G0cjBTeYJVFSWz42CL1Qv",
+      "1d3R7Rcuwsn9DO-N3_v85omQ0pOfYIQ7t",
+      "1ODI_PvNfCyNpwiF4_JFZffiiAoi8XwHl",
+      "1cZpkqJWOzujQXYtRakFFze8IpzAs4wkJ",
+      "1Db02oQZKlHlYIAqrg-8FcnYMmlhF0X97",
+      "1lE5FEZL9JLCwov2g0ZE3h-Ei5iFmg0Qz",
+    ].map((id) => dt(id)),
   },
   {
     id: "devshala",
@@ -127,6 +197,12 @@ export const projects: Project[] = [
     posterImage: pDevshala,
     videoEmbedId: "XfYx4f2akhA",
     category: "AI Production",
+    stills: [
+      "1DA8h3zyaQzL3wp-ThbFgqDcI_7rGyBLk",
+      "1x4tjxu9SKPYCxbgDbSA1HSFi64bRnd0Z",
+      "1ArX8LgD1d1i7_5gr6RnzoD2OLrxzTn6M",
+      "1kKedtvsAvcDxiXZVInlX3IcXKfXQhhGd",
+    ].map((id) => dt(id)),
   },
   {
     id: "unreal-previz",
@@ -155,6 +231,18 @@ export const projects: Project[] = [
       "ZHxkDp41G4c",
     ],
     category: "Storyboard Reel",
+    stills: [
+      "1fNWVsjXtSuKKyqfoS17vuLpUBLMxGs1g",
+      "1yK7s-qvhjoypj98FG-UVqFz_Zw0Rnt40",
+      "15y1DTbfSDqt4PipkA5W2FGKZb2kPkxV0",
+      "1f1FX17fLTGz8EDuJS-HDWRCgBHzrl2DW",
+      "18fzdrg54QFSVXlO-hjKYMkCNDcy1c_O0",
+      "1kH5Egmr_vwe7FxvR9agND0HGmRtlbYus",
+      "1o2FzwORakrjeAsk-fDXOaocaxty1b2zY",
+      "161oY2syJnxMb5olsEMhXXWugHOLoIpEs",
+      "1sDXn9Y320hgfRznT5JuSxckuYVJaNbyM",
+      "1iTR8DTdmykRhD1MoCg_cpPbKNHeJ4eW_",
+    ].map((id) => dt(id)),
   },
   {
     id: "illustrations",
@@ -164,15 +252,74 @@ export const projects: Project[] = [
       "I've always loved drawing and painting characters. AI may be reshaping the craft, but having designed and rendered characters by hand for years gives me a sharper eye for evaluating AI output — and the skill to step in with manual tweaks that lock in the exact appeal a story needs.",
     posterImage: pIllustrations,
     category: "Visual Development",
+    hideVideo: true,
+    imageSections: [
+      {
+        heading: "Character Designs",
+        images: [
+          "16l4NgyS0ikeMOvyXhRdkgxv4beuoDdlO",
+          "1FQ00HJ8Fb8VM3ubSnRcGr_5rQszzgjZb",
+          "1fKGaqtaxkYJvMW0TsuVHRhEA155vUiLb",
+          "14oakMsvGqABR6DIlcsI8nNu5gouug1Bq",
+          "1HVg7kKE2eeMAw4LO90n7avIPLv2vGNVP",
+          "1Sh6awym2ytm-cONq3P5n2s9mU5NFtXPj",
+          "1TnfpB1jV5PILyJQ9yHL_oH5mJ6R5pJAi",
+          "1EFutoR17_MoZzQrVkNXh29GMvR9QBfC0",
+          "1UA-jWDkoGZoOrmx8iTcunZFTZq1_f5xl",
+          "168GG9o1hnpJ880EFeysADOSyNQxtgsyA",
+          "1X6viYIx49JZSSB7nGqjkB8-SPOWuHuNE",
+          "1FzLrru2qNiUDXHgg3MqggZVU4it0zF7o",
+          "1PX1ZLYgWEFIy2t8p135dOF4R3pJTTMN0",
+          "1IUfQRHeSVSIedCKaE9YVU18GSNiaby1D",
+          "18ZmAaaud8QbhEaBvBzvUEaL-6mphwCtl",
+          "12l2AzORbggOZea8pWEzUN5eUcDgt0jWz",
+          "1XGpO2v-GRHxGcNbf6DWqQy0j_9mhfYxJ",
+          "1c2CXXT7nFwC4puTkBEtv2vqBqtuJE1_o",
+          "1aM49C8hFLIijLsDBETSMI83zRFO-jdBG",
+          "1vFfuwpRiQbqU4shfyhW514dCf82zsMkf",
+          "1A_LCrJbpNbnGm-G9SdrwfMWcVwR-sdzB",
+          "1IwOWlsz_TGqv6hT4dQWIobwnOz9GP-hr",
+          "107s68XNxgryxCccvoXSUgEh8-wMNHw3b",
+          "15q0wqgLA4LYN9GfiZ9ym6QlONsn-RQQg",
+          "1Co7mybh-Nj8ULWneMnbKCbpzoWSs3yGA",
+          "1VQknN25d9mr4z5YmHqtZMfDlsl0YwJbX",
+          "1t2ElaQIZsXjMsvhj3f_ttlhWownIXQ4r",
+          "1el72f1m3CXGeepsQ-X1peivt0l-jg_hs",
+          "1_2Bsqw68RJheRFAvvhovvFhPpET3ri8W",
+          "1FCdus61CS1t6f48jvzkRNDmEqG8rIb0r",
+          "1r4Y-4FhB-Em9mI_EVzOC9ygaBagtvpQn",
+          "11CJ_M8fP5mDV-r4qtfDvWI4QaWS3mEBi",
+        ].map((id) => dt(id)),
+      },
+      {
+        heading: "Illustrations",
+        images: [
+          "1gf_roI1MrnLvTcecdNC7li-afnJOO2nw",
+          "1h3SE-eq2iIf8Me9I9uQCkAPf3dj6o0Ng",
+          "1IYMVtucOOph2cVJegePGGDqFL3QvuIgz",
+          "1EIqwO1uLU2-O1iIoMOy1TTY2qdNNUBrd",
+          "1JH6p4c8GQHdOT5yc4AE1Kn511RBgziKo",
+          "1nmGavQ80igUZu73M65PjUdJnqaBIj9oT",
+          "1nzJTRllRUtKeU-O5i9mr6vEgX6KJWDIS",
+          "1Yg5QDb3-17sQ4YypJqTowEBxOjg08q7H",
+          "1TkRhnV33Udz2PvqbOZB4Y3XDpbEbmnd8",
+        ].map((id) => dt(id)),
+      },
+    ],
   },
   {
     id: "movies-series-vfx",
-    title: "Movies, Series & VFX",
-    role: "Animation / VFX / Motion Graphics",
+    title: "Movies, Series & Cartoon Projects",
+    role: "Animation / VFX / Motion Graphics — Selected Filmography",
     description:
-      "A decade of contributions across feature films and series — motion graphics, 2D cheat-shot VFX, motion capture into Unreal Metahumans, music-video animation and PIP shots. Highlights:\n\n• Bhavesh Joshi Superhero — 2D image-warp VFX in Moho\n• Ghost Stories (Netflix anthology by Anurag Kashyap, Zoya Akhtar, Karan Johar, Dibakar Banerjee) — 2D mesh-warp VFX shots saving full CG cost\n• Jigra (Alia Bhatt) — 2D mesh-warp VFX shots\n• Dobaaraa (Taapsee Pannu) — 15-year timelapse VFX sequence in Blender\n• Sacred Games (Anurag Kashyap; Saif Ali Khan, Nawazuddin Siddiqui) — 2D motion graphics\n• Animator credits on international shows including Ninja Hattori, Oggy and the Cockroaches, Kid Krrish, Jules Verne, Mati & Dada and more.",
+      "A decade of contributions across feature films and series — motion graphics, 2D cheat-shot VFX, motion capture into Unreal Metahumans, music-video animation and PIP shots. Highlights:\n\n• Bhavesh Joshi Superhero — 2D image-warp VFX in Moho\n• Ghost Stories (Netflix anthology by Anurag Kashyap, Zoya Akhtar, Karan Johar, Dibakar Banerjee) — 2D mesh-warp VFX shots saving full CG cost\n• Jigra (Alia Bhatt) — 2D mesh-warp VFX shots\n• Dobaaraa (Taapsee Pannu) — 15-year timelapse VFX sequence in Blender\n• Sacred Games (Anurag Kashyap; Saif Ali Khan, Nawazuddin Siddiqui) — 2D motion graphics\n• Cartoon credits include Ninja Hattori, Oggy and the Cockroaches, Kid Krrish, Jules Verne, Mati & Dada and more.",
     posterImage: pBlackWarrant,
     category: "Selected Filmography",
+    hideVideo: true,
+    imageSections: [
+      { heading: "Movies, Series & VFX", images: [] },
+      { heading: "Cartoon Projects", images: [] },
+    ],
   },
 ];
 

@@ -9,20 +9,22 @@ import ClientsSection from "@/components/ClientsSection";
 import ContactSection from "@/components/ContactSection";
 
 const Index = () => {
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
 
-  const handleToggleMute = useCallback(() => {
-    setIsMuted((prev) => !prev);
-  }, []);
-
-  const handleAutoMute = useCallback(() => {
-    setIsMuted(true);
-  }, []);
+  const handleToggleMute = useCallback(() => setIsMuted((p) => !p), []);
+  const handleTogglePlay = useCallback(() => setIsPlaying((p) => !p), []);
+  const handleAutoMute = useCallback(() => setIsMuted(true), []);
 
   return (
     <div className="min-h-screen bg-background">
-      <Header isMuted={isMuted} onToggleMute={handleToggleMute} />
-      <HeroSection isMuted={isMuted} onAutoMute={handleAutoMute} />
+      <Header
+        isMuted={isMuted}
+        isPlaying={isPlaying}
+        onToggleMute={handleToggleMute}
+        onTogglePlay={handleTogglePlay}
+      />
+      <HeroSection isMuted={isMuted} isPlaying={isPlaying} onAutoMute={handleAutoMute} />
       <AboutSection />
       <ProjectsSection />
       <SkillsSection />
