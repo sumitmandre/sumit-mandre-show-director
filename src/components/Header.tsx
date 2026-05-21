@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { Volume2, VolumeX, Linkedin, Instagram, Mail } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Volume2, VolumeX, Play, Pause, Linkedin, Instagram, Mail } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface HeaderProps {
   isMuted: boolean;
+  isPlaying: boolean;
   onToggleMute: () => void;
+  onTogglePlay: () => void;
 }
 
-const Header = ({ isMuted, onToggleMute }: HeaderProps) => {
+const Header = ({ isMuted, isPlaying, onToggleMute, onTogglePlay }: HeaderProps) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -39,9 +41,16 @@ const Header = ({ isMuted, onToggleMute }: HeaderProps) => {
 
         <div className="flex items-center gap-4 md:gap-6">
           <button
+            onClick={onTogglePlay}
+            className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+            aria-label={isPlaying ? "Pause showreel" : "Play showreel"}
+          >
+            {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+          </button>
+          <button
             onClick={onToggleMute}
             className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
-            aria-label={isMuted ? "Unmute" : "Mute"}
+            aria-label={isMuted ? "Unmute showreel" : "Mute showreel"}
           >
             {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
