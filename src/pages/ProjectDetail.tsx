@@ -177,35 +177,53 @@ const ProjectDetail = () => {
         )}
 
         {/* Image sections (illustrations / cartoons) */}
-        {project.imageSections?.map((section, si) => (
-          <motion.div
-            key={si}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 + si * 0.1, duration: 0.6 }}
-          >
-            {section.heading && (
-              <h2 className="font-display text-2xl font-semibold mb-6">{section.heading}</h2>
-            )}
-            {section.images.length === 0 ? (
-              <p className="text-muted-foreground text-sm italic">Gallery coming soon.</p>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                {section.images.map((src, i) => (
-                  <div key={i} className="aspect-square rounded-sm overflow-hidden bg-secondary">
-                    <img
-                      src={src}
-                      alt={`${section.heading} ${i + 1}`}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        ))}
+        {project.imageSections?.map((section, si) => {
+          const isCartoonCollage = /cartoon/i.test(section.heading ?? "");
+          return (
+            <motion.div
+              key={si}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 + si * 0.1, duration: 0.6 }}
+            >
+              {section.heading && (
+                <h2 className="font-display text-2xl font-semibold mb-6">{section.heading}</h2>
+              )}
+              {section.images.length === 0 ? (
+                <p className="text-muted-foreground text-sm italic">Gallery coming soon.</p>
+              ) : isCartoonCollage ? (
+                // Cartoon collage — render at full bleed since it's a single collage image
+                <div className="space-y-4 -mx-6 md:-mx-10">
+                  {section.images.map((src, i) => (
+                    <div key={i} className="w-full bg-secondary overflow-hidden">
+                      <img
+                        src={src}
+                        alt={`${section.heading} ${i + 1}`}
+                        className="w-full h-auto object-contain"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                  {section.images.map((src, i) => (
+                    <div key={i} className="aspect-square rounded-sm overflow-hidden bg-secondary">
+                      <img
+                        src={src}
+                        alt={`${section.heading} ${i + 1}`}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
