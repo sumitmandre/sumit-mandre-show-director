@@ -313,12 +313,27 @@ export const projects: Project[] = [
     role: "Animation / VFX / Motion Graphics — Selected Filmography",
     description:
       "A decade of contributions across feature films and series — motion graphics, 2D cheat-shot VFX, motion capture into Unreal Metahumans, music-video animation and PIP shots. Highlights:\n\n• Bhavesh Joshi Superhero — 2D image-warp VFX in Moho\n• Ghost Stories (Netflix anthology by Anurag Kashyap, Zoya Akhtar, Karan Johar, Dibakar Banerjee) — 2D mesh-warp VFX shots saving full CG cost\n• Jigra (Alia Bhatt) — 2D mesh-warp VFX shots\n• Dobaaraa (Taapsee Pannu) — 15-year timelapse VFX sequence in Blender\n• Sacred Games (Anurag Kashyap; Saif Ali Khan, Nawazuddin Siddiqui) — 2D motion graphics\n• Cartoon credits include Ninja Hattori, Oggy and the Cockroaches, Kid Krrish, Jules Verne, Mati & Dada and more.",
-    posterImage: pBlackWarrant,
+    posterImage: dt("16fuffHdtWi5O_wantUwFWkheVkYhWqVd"),
     category: "Selected Filmography",
     hideVideo: true,
     imageSections: [
-      { heading: "Movies, Series & VFX", images: [] },
-      { heading: "Cartoon Projects", images: [] },
+      {
+        heading: "Movies, Series & VFX",
+        images: [
+          "1GTFl_JU03S_Qevd48mxlI9G0ImMV95ef",
+          "1lHB944EgoZAwbOEoc0ENKdwtd2rACcUh",
+          "1fkvWbSGBE1JB1D_0kTIU1srB7siCifBF",
+          "1zyT_bS4W3tQ3VvL8l3qZT4yO-FxPlqJG",
+          "1GXO6b_0BkeT5ANdEY0B3D6jpFkCF18iR",
+          "16fuffHdtWi5O_wantUwFWkheVkYhWqVd",
+        ].map((id) => dt(id)),
+      },
+      {
+        heading: "Cartoon Projects",
+        images: [
+          "1yDjKJkqHoFR8UR3oY736pqi5wphN8bi_",
+        ].map((id) => dt(id)),
+      },
     ],
   },
 ];
