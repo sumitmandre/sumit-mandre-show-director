@@ -14,6 +14,8 @@ const SHOWREEL_ID = "O4gjv779n68";
 const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute }: HeroProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [nearEnd, setNearEnd] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const durationRef = useRef<number>(0);
 
   const post = (func: string, args: unknown[] = []) =>
