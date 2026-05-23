@@ -372,10 +372,8 @@ export const skills = {
 };
 
 export const awards = [
-  { year: "2025", title: "Best Series", event: "Filmfare OTT Awards", project: "Black Warrant" },
-  { year: "2026", title: "Best Web Series", event: "News18 Showsha Reel Awards", project: "Black Warrant" },
-  { year: "2024", title: "Best Film", event: "Filmfare OTT Awards", project: "Amar Singh Chamkila" },
+  { year: "2025", title: "Best Animator & Best Storyboard Artist", event: "ANN Awards", project: "Amar Singh Chamkila" },
+  { year: "2025", title: "Annecy WIP Session", event: "Annecy International Animation Festival", project: "Heirloom" },
   { year: "2023", title: "Annecy Festival Residency Selection", event: "Annecy International Animation Festival", project: "Heirloom" },
-  { year: "2023", title: "Official Pitch", event: "Marché du Film, Cannes / MIFA / Film Bazaar IFFI", project: "Heirloom" },
   { year: "2022", title: "20M+ Views Anime Promo", event: "YouTube Global", project: "PUBG / BGMI" },
 ];

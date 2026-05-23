@@ -14,6 +14,8 @@ const SHOWREEL_ID = "O4gjv779n68";
 const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute }: HeroProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [nearEnd, setNearEnd] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const durationRef = useRef<number>(0);
 
   const post = (func: string, args: unknown[] = []) =>
@@ -67,9 +69,12 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute }: HeroProps
       try {
         const data = JSON.parse(e.data);
         if (data.event === "infoDelivery" && data.info) {
-          if (typeof data.info.duration === "number" && data.info.duration > 0)
+          if (typeof data.info.duration === "number" && data.info.duration > 0) {
             durationRef.current = data.info.duration;
+            setDuration(data.info.duration);
+          }
           if (typeof data.info.currentTime === "number" && durationRef.current > 0) {
+            setCurrentTime(data.info.currentTime);
             const remaining = durationRef.current - data.info.currentTime;
             setNearEnd(remaining > 0 && remaining < 8);
           }
@@ -150,6 +155,39 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute }: HeroProps
           <ChevronDown size={18} className="text-white/80" />
         </motion.div>
       </motion.div>
+
+      {/* Minimal progress slider — bottom edge */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-6 md:px-10 pb-3">
+        <input
+          type="range"
+          min={0}
+          max={1000}
+          value={duration > 0 ? Math.round((currentTime / duration) * 1000) : 0}
+          onChange={(e) => {
+            const pct = Number(e.target.value) / 1000;
+            if (duration > 0) {
+              iframeRef.current?.contentWindow?.postMessage(
+                JSON.stringify({ event: "command", func: "seekTo", args: [pct * duration, true] }),
+                "*"
+              );
+              setCurrentTime(pct * duration);
+            }
+          }}
+          aria-label="Showreel progress"
+          className="w-full h-[2px] appearance-none bg-white/15 rounded-full cursor-pointer
+            [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2
+            [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary
+            [&::-moz-range-thumb]:w-2 [&::-moz-range-thumb]:h-2 [&::-moz-range-thumb]:rounded-full
+            [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
+          style={{
+            background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${
+              duration > 0 ? (currentTime / duration) * 100 : 0
+            }%, rgba(255,255,255,0.15) ${
+              duration > 0 ? (currentTime / duration) * 100 : 0
+            }%, rgba(255,255,255,0.15) 100%)`,
+          }}
+        />
+      </div>
     </section>
   );
 };
