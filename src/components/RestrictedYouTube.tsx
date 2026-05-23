@@ -8,17 +8,13 @@ interface Props {
   autoplay?: boolean;
 }
 
-/**
- * Restricted YouTube embed:
- * - Hides YouTube title bar, channel, "Watch on YouTube" overlay, share/copy link, settings, CC
- * - Custom Play/Pause/Mute controls only
- * - Blocks long-press context menu (prevents copy link on mobile)
- * - Non-downloadable, non-embeddable for others
- */
 const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay = false }: Props) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isPlaying, setIsPlaying] = useState(autoplay);
   const [isMuted, setIsMuted] = useState(autoplay);
+  const [progress, setProgress] = useState(0); // 0..1
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const send = useCallback((func: string, args: unknown[] = []) => {
     iframeRef.current?.contentWindow?.postMessage(
@@ -39,13 +35,48 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
     setIsMuted((m) => !m);
   }, [isMuted, send]);
 
+  // Poll the iframe for current time/duration
   useEffect(() => {
-    // Block right-click/long-press globally on this component
-    const handler = (e: Event) => e.preventDefault();
-    const el = iframeRef.current?.parentElement;
-    el?.addEventListener("contextmenu", handler);
-    return () => el?.removeEventListener("contextmenu", handler);
-  }, []);
+    const onMsg = (e: MessageEvent) => {
+      if (typeof e.data !== "string") return;
+      try {
+        const data = JSON.parse(e.data);
+        if (data.event === "infoDelivery" && data.info) {
+          if (typeof data.info.duration === "number" && data.info.duration > 0)
+            setDuration(data.info.duration);
+          if (typeof data.info.currentTime === "number") {
+            setCurrentTime(data.info.currentTime);
+            const d = data.info.duration ?? duration;
+            if (d > 0) setProgress(Math.min(1, data.info.currentTime / d));
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener("message", onMsg);
+    const id = setInterval(() => {
+      iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: "listening" }), "*");
+    }, 500);
+    return () => {
+      window.removeEventListener("message", onMsg);
+      clearInterval(id);
+    };
+  }, [duration]);
+
+  const seek = (pct: number) => {
+    if (duration > 0) {
+      send("seekTo", [pct * duration, true]);
+      setProgress(pct);
+    }
+  };
+
+  const fmt = (t: number) => {
+    if (!isFinite(t) || t <= 0) return "0:00";
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   const params = new URLSearchParams({
     autoplay: autoplay ? "1" : "0",
@@ -77,7 +108,6 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
         referrerPolicy="strict-origin-when-cross-origin"
         className="absolute inset-0 w-full h-full pointer-events-none"
       />
-      {/* Click-shield: blocks long-press context menu, link clicks, and YT chrome */}
       <button
         type="button"
         onClick={togglePlay}
@@ -86,7 +116,6 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
         className="absolute inset-0 w-full h-full bg-transparent cursor-pointer"
       />
 
-      {/* Center play indicator (only when paused) */}
       {!isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/90 flex items-center justify-center shadow-2xl">
@@ -95,24 +124,51 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
         </div>
       )}
 
-      {/* Custom controls bar */}
-      <div className="absolute bottom-0 left-0 right-0 px-3 py-2 flex items-center gap-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-        <button
-          type="button"
-          onClick={togglePlay}
-          aria-label={isPlaying ? "Pause" : "Play"}
-          className="p-2 rounded-full bg-background/40 hover:bg-background/70 backdrop-blur text-foreground transition-colors"
-        >
-          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-        </button>
-        <button
-          type="button"
-          onClick={toggleMute}
-          aria-label={isMuted ? "Unmute" : "Mute"}
-          className="p-2 rounded-full bg-background/40 hover:bg-background/70 backdrop-blur text-foreground transition-colors"
-        >
-          {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-        </button>
+      {/* Controls + minimal slider */}
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-2 pt-6 flex flex-col gap-1.5 bg-gradient-to-t from-black/85 to-transparent opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+        {/* Slider */}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] tabular-nums text-white/70 font-display w-8">{fmt(currentTime)}</span>
+          <input
+            type="range"
+            min={0}
+            max={1000}
+            value={Math.round(progress * 1000)}
+            onChange={(e) => seek(Number(e.target.value) / 1000)}
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Seek"
+            className="flex-1 h-[2px] appearance-none bg-white/20 rounded-full accent-primary cursor-pointer
+              [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5
+              [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary
+              [&::-moz-range-thumb]:w-2.5 [&::-moz-range-thumb]:h-2.5 [&::-moz-range-thumb]:rounded-full
+              [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
+            style={{
+              background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${
+                progress * 100
+              }%, rgba(255,255,255,0.18) ${progress * 100}%, rgba(255,255,255,0.18) 100%)`,
+            }}
+          />
+          <span className="text-[10px] tabular-nums text-white/70 font-display w-8 text-right">{fmt(duration)}</span>
+        </div>
+        {/* Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={togglePlay}
+            aria-label={isPlaying ? "Pause" : "Play"}
+            className="p-1.5 rounded-full bg-background/40 hover:bg-background/70 backdrop-blur text-foreground transition-colors"
+          >
+            {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+          </button>
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={isMuted ? "Unmute" : "Mute"}
+            className="p-1.5 rounded-full bg-background/40 hover:bg-background/70 backdrop-blur text-foreground transition-colors"
+          >
+            {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+          </button>
+        </div>
       </div>
     </div>
   );
