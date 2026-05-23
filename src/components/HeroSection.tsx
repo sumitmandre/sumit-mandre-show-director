@@ -69,9 +69,12 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute }: HeroProps
       try {
         const data = JSON.parse(e.data);
         if (data.event === "infoDelivery" && data.info) {
-          if (typeof data.info.duration === "number" && data.info.duration > 0)
+          if (typeof data.info.duration === "number" && data.info.duration > 0) {
             durationRef.current = data.info.duration;
+            setDuration(data.info.duration);
+          }
           if (typeof data.info.currentTime === "number" && durationRef.current > 0) {
+            setCurrentTime(data.info.currentTime);
             const remaining = durationRef.current - data.info.currentTime;
             setNearEnd(remaining > 0 && remaining < 8);
           }
