@@ -24,10 +24,19 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
   }, []);
 
   const togglePlay = useCallback(() => {
-    if (isPlaying) send("pauseVideo");
-    else send("playVideo");
+    if (isPlaying) {
+      send("pauseVideo");
+    } else {
+      // First user gesture on this video — unmute so audio plays from the start
+      if (isMuted) {
+        send("unMute");
+        send("setVolume", [100]);
+        setIsMuted(false);
+      }
+      send("playVideo");
+    }
     setIsPlaying((p) => !p);
-  }, [isPlaying, send]);
+  }, [isPlaying, isMuted, send]);
 
   const toggleMute = useCallback(() => {
     if (isMuted) send("unMute");
