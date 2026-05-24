@@ -27,18 +27,18 @@ const ContactSection = () => {
 
           <div className="pt-8">
             <a
-              href="mailto:sumit@mandre.com"
+              href="mailto:sumitmandre@gmail.com"
               className="inline-flex items-center gap-3 font-display text-xl md:text-2xl font-semibold text-foreground hover:text-primary transition-colors group"
             >
               <Mail size={24} className="text-primary" />
-              sumit@mandre.com
+              sumitmandre@gmail.com
               <ArrowUpRight size={20} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
             </a>
           </div>
 
           <div className="flex justify-center gap-4 pt-4">
             <a
-              href="https://linkedin.com/in/sumitmandre"
+              href="https://www.linkedin.com/in/sumit-mandre-aab88653"
               target="_blank"
               rel="noopener noreferrer"
               className="w-12 h-12 rounded-full border border-border flex items-center justify-center hover:bg-primary hover:border-primary hover:text-primary-foreground text-muted-foreground transition-all duration-300"
@@ -46,7 +46,7 @@ const ContactSection = () => {
               <Linkedin size={18} />
             </a>
             <a
-              href="https://instagram.com/sumitmandre"
+              href="https://www.instagram.com/sumit_mandre"
               target="_blank"
               rel="noopener noreferrer"
               className="w-12 h-12 rounded-full border border-border flex items-center justify-center hover:bg-primary hover:border-primary hover:text-primary-foreground text-muted-foreground transition-all duration-300"

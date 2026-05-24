@@ -7,7 +7,7 @@ import pDevshala from "@/assets/p-devshala.jpg";
 import pUnreal from "@/assets/p-unreal-previz.png";
 import pLupin from "@/assets/p-lupin-tales.jpg";
 import pCtrl from "@/assets/p-ctrl.jpg";
-import pIllustrations from "@/assets/p-illustrations.png";
+import pIllustrations from "@/assets/p-illustrations.jpg";
 
 // Google Drive thumbnail helper — uses the public file ID
 const dt = (id: string, w = 1600) => `https://drive.google.com/thumbnail?id=${id}&sz=w${w}`;
@@ -270,11 +270,11 @@ export const projects: Project[] = [
           "1X6viYIx49JZSSB7nGqjkB8-SPOWuHuNE",
           "1FzLrru2qNiUDXHgg3MqggZVU4it0zF7o",
           "1PX1ZLYgWEFIy2t8p135dOF4R3pJTTMN0",
+          "1XGpO2v-GRHxGcNbf6DWqQy0j_9mhfYxJ",
+          "1c2CXXT7nFwC4puTkBEtv2vqBqtuJE1_o",
           "1IUfQRHeSVSIedCKaE9YVU18GSNiaby1D",
           "18ZmAaaud8QbhEaBvBzvUEaL-6mphwCtl",
           "12l2AzORbggOZea8pWEzUN5eUcDgt0jWz",
-          "1XGpO2v-GRHxGcNbf6DWqQy0j_9mhfYxJ",
-          "1c2CXXT7nFwC4puTkBEtv2vqBqtuJE1_o",
           "1aM49C8hFLIijLsDBETSMI83zRFO-jdBG",
           "1vFfuwpRiQbqU4shfyhW514dCf82zsMkf",
           "1A_LCrJbpNbnGm-G9SdrwfMWcVwR-sdzB",
@@ -289,7 +289,7 @@ export const projects: Project[] = [
           "1FCdus61CS1t6f48jvzkRNDmEqG8rIb0r",
           "1r4Y-4FhB-Em9mI_EVzOC9ygaBagtvpQn",
           "11CJ_M8fP5mDV-r4qtfDvWI4QaWS3mEBi",
-        ].map((id) => dt(id)),
+        ].map((id) => `${dt(id)}&v=2`),
       },
       {
         heading: "Illustrations",

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Volume2, VolumeX, Play, Pause, Linkedin, Instagram, Mail } from "lucide-react";
 import { motion } from "framer-motion";
+import sumitLogo from "@/assets/logos/sumit-logo.jpg";
 
 interface HeaderProps {
   isMuted: boolean;
@@ -31,8 +32,8 @@ const Header = ({ isMuted, isPlaying, onToggleMute, onTogglePlay }: HeaderProps)
     >
       <div className="max-w-7xl mx-auto px-6 md:px-10 h-16 md:h-20 flex items-center justify-between">
         <a href="/" className="flex items-center gap-3 group">
-          <div className="w-8 h-8 rounded-sm bg-primary/10 border border-primary/30 flex items-center justify-center">
-            <span className="font-display text-sm font-bold text-primary">SM</span>
+          <div className="w-9 h-9 rounded-sm overflow-hidden border border-primary/30 bg-background">
+            <img src={sumitLogo} alt="Sumit Mandre logo" className="w-full h-full object-cover" />
           </div>
           <span className="font-display text-lg font-semibold tracking-tight text-foreground">
             Sumit Mandre
@@ -59,7 +60,7 @@ const Header = ({ isMuted, isPlaying, onToggleMute, onTogglePlay }: HeaderProps)
 
           <nav className="flex items-center gap-3">
             <a
-              href="https://linkedin.com/in/sumitmandre"
+              href="https://www.linkedin.com/in/sumit-mandre-aab88653"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
@@ -68,7 +69,7 @@ const Header = ({ isMuted, isPlaying, onToggleMute, onTogglePlay }: HeaderProps)
               <Linkedin size={18} />
             </a>
             <a
-              href="https://instagram.com/sumitmandre"
+              href="https://www.instagram.com/sumit_mandre"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
@@ -77,7 +78,7 @@ const Header = ({ isMuted, isPlaying, onToggleMute, onTogglePlay }: HeaderProps)
               <Instagram size={18} />
             </a>
             <a
-              href="mailto:sumit@mandre.com"
+              href="mailto:sumitmandre@gmail.com"
               className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
               aria-label="Email"
             >
