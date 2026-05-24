@@ -11,18 +11,26 @@ import {
   Camera,
 } from "lucide-react";
 
-/** Software with proficiency (out of 6) — mirrors the reference card */
-const software: { name: string; level: number; letter: string; color: string }[] = [
-  { name: "Photoshop",      level: 6, letter: "Ps", color: "#31A8FF" },
-  { name: "Storyboard Pro", level: 5, letter: "Sb", color: "#E36F1E" },
-  { name: "Blender",        level: 4, letter: "Bl", color: "#F5792A" },
-  { name: "After Effects",  level: 5, letter: "Ae", color: "#9999FF" },
-  { name: "Adobe Animate",  level: 6, letter: "An", color: "#FF7C00" },
-  { name: "Anime / Moho",   level: 6, letter: "Mo", color: "#7DD3C0" },
-  { name: "Premiere Pro",   level: 5, letter: "Pr", color: "#9999FF" },
-  { name: "Autodesk Maya",  level: 3, letter: "Ma", color: "#0696D7" },
-  { name: "Unreal Engine",  level: 4, letter: "Ue", color: "#E5E5E5" },
-  { name: "AI Pipeline",    level: 4, letter: "AI", color: "#C9A84C" },
+import ps from "@/assets/software/s1.png";
+import sbpro from "@/assets/software/s2.png";
+import moho from "@/assets/software/s3.jpg";
+import animate from "@/assets/software/s4.png";
+import premiere from "@/assets/software/s5.png";
+import ae from "@/assets/software/s6.jpg";
+import blender from "@/assets/software/s7.jpg";
+import maya from "@/assets/software/s8.jpg";
+import unreal from "@/assets/software/s9.jpg";
+
+const software: { name: string; level: number; logo: string }[] = [
+  { name: "Photoshop",       level: 6, logo: ps },
+  { name: "Storyboard Pro",  level: 5, logo: sbpro },
+  { name: "Adobe Animate",   level: 6, logo: animate },
+  { name: "Moho (Anime Studio)", level: 6, logo: moho },
+  { name: "After Effects",   level: 5, logo: ae },
+  { name: "Premiere Pro",    level: 5, logo: premiere },
+  { name: "Blender",         level: 4, logo: blender },
+  { name: "Autodesk Maya",   level: 3, logo: maya },
+  { name: "Unreal Engine",   level: 4, logo: unreal },
 ];
 
 const coreSkills: { icon: React.ElementType; label: string }[] = [
@@ -77,16 +85,13 @@ const SkillsSection = () => {
                   transition={{ duration: 0.4, delay: 0.1 + i * 0.04 }}
                   className="flex items-center gap-4"
                 >
-                  <span
-                    className="flex-shrink-0 w-9 h-9 rounded-sm flex items-center justify-center font-display text-[11px] font-bold border"
-                    style={{
-                      color: s.color,
-                      borderColor: `${s.color}55`,
-                      background: `${s.color}12`,
-                    }}
-                    aria-hidden
-                  >
-                    {s.letter}
+                  <span className="flex-shrink-0 w-10 h-10 rounded-sm bg-background/60 border border-border/60 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={s.logo}
+                      alt={`${s.name} logo`}
+                      loading="lazy"
+                      className="w-8 h-8 object-contain"
+                    />
                   </span>
                   <span className="flex-1 text-sm md:text-base text-foreground font-medium">
                     {s.name}
