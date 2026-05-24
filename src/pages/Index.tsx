@@ -16,6 +16,7 @@ const Index = () => {
   const handleTogglePlay = useCallback(() => setIsPlaying((p) => !p), []);
   const handleAutoMute = useCallback(() => setIsMuted(true), []);
   const handleUserUnmute = useCallback(() => setIsMuted(false), []);
+  const handleUserPlay = useCallback(() => setIsPlaying(true), []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,6 +31,7 @@ const Index = () => {
         isPlaying={isPlaying}
         onAutoMute={handleAutoMute}
         onUserUnmute={handleUserUnmute}
+        onUserPlay={handleUserPlay}
       />
       <AboutSection />
       <ProjectsSection />
