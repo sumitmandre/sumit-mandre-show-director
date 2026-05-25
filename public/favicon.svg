@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <rect width="200" height="200" rx="24" fill="#111111"/>
-  <!-- gold upper swoosh -->
-  <path d="M 155,42 A 90,90 0 0,1 88,112 A 58,58 0 0,0 155,42 Z" fill="#CA8C18"/>
-  <!-- cream lower swoosh -->
-  <path d="M 45,158 A 90,90 0 0,1 112,88 A 58,58 0 0,0 45,158 Z" fill="#F0ECE6"/>
+  <rect width="200" height="200" rx="24" fill="#0C0C0C"/>
+  <!-- gold upper swoosh: outer edge sweeps far left, inner edge cuts through centre -->
+  <path d="M 153,43 C 0,46 1,110 83,130 C 83,108 132,53 153,43 Z" fill="#C88A10"/>
+  <!-- cream lower swoosh: exact 180° rotation of gold around (100,100) -->
+  <path d="M 47,157 C 200,154 199,90 117,70 C 117,92 68,147 47,157 Z" fill="#F0ECE5"/>
 </svg>
