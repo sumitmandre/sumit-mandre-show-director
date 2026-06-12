@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Play, Headphones } from "lucide-react";
+import { ChevronDown, Play, Pause, Headphones, Volume2, VolumeX } from "lucide-react";
 
 interface HeroProps {
   isMuted: boolean;
@@ -28,12 +28,15 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay 
 
   const handleStart = () => {
     setStarted(true);
-    // small delay so iframe with autoplay=1 loads — then ensure unmuted & playing
+    // small delay so iframe with autoplay=1 loads — then ensure unmuted & playing in HD
     setTimeout(() => {
       post("unMute");
       post("setVolume", [100]);
       post("playVideo");
+      post("setPlaybackQuality", ["hd1080"]);
     }, 250);
+    setTimeout(() => post("setPlaybackQuality", ["hd1080"]), 1500);
+    setTimeout(() => post("setPlaybackQuality", ["hd1080"]), 3500);
     onUserUnmute?.();
     onUserPlay?.();
   };
@@ -106,6 +109,8 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay 
     fs: "0",
     cc_load_policy: "0",
     enablejsapi: "1",
+    vq: "hd1080",
+    hd: "1",
   }).toString();
 
   return (
@@ -118,7 +123,7 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay 
         <div className="absolute inset-0 overflow-hidden">
           <iframe
             ref={iframeRef}
-            src={`https://www.youtube-nocookie.com/embed/${SHOWREEL_ID}?${params}`}
+            src={`https://www.youtube.com/embed/${SHOWREEL_ID}?${params}`}
             title="Sumit Mandre — Showreel"
             allow="autoplay; encrypted-media; picture-in-picture"
             referrerPolicy="strict-origin-when-cross-origin"
