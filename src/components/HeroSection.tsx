@@ -173,6 +173,30 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
         )}
       </AnimatePresence>
 
+      {/* Center play/pause control (hover to reveal) */}
+      {started && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-opacity duration-300">
+          <div className="flex items-center gap-4 pointer-events-auto">
+            <button
+              type="button"
+              onClick={onTogglePlay}
+              aria-label={isPlaying ? "Pause" : "Play"}
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm flex items-center justify-center shadow-2xl transition-all hover:scale-105"
+            >
+              {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+            </button>
+            <button
+              type="button"
+              onClick={onToggleMute}
+              aria-label={isMuted ? "Unmute" : "Mute"}
+              className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white flex items-center justify-center transition-colors"
+            >
+              {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Small unobtrusive showreel label */}
       {started && (
         <div className="pointer-events-none absolute bottom-6 left-6 md:bottom-8 md:left-10 z-10">
