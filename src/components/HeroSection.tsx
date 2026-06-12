@@ -8,11 +8,13 @@ interface HeroProps {
   onAutoMute: () => void;
   onUserUnmute?: () => void;
   onUserPlay?: () => void;
+  onTogglePlay?: () => void;
+  onToggleMute?: () => void;
 }
 
 const SHOWREEL_ID = "O4gjv779n68";
 
-const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay }: HeroProps) => {
+const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay, onTogglePlay, onToggleMute }: HeroProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [started, setStarted] = useState(false);
   const [nearEnd, setNearEnd] = useState(false);
