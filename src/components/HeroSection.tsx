@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Play, Headphones } from "lucide-react";
+import { ChevronDown, Play, Pause, Headphones, Volume2, VolumeX } from "lucide-react";
 
 interface HeroProps {
   isMuted: boolean;
@@ -8,11 +8,13 @@ interface HeroProps {
   onAutoMute: () => void;
   onUserUnmute?: () => void;
   onUserPlay?: () => void;
+  onTogglePlay?: () => void;
+  onToggleMute?: () => void;
 }
 
 const SHOWREEL_ID = "O4gjv779n68";
 
-const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay }: HeroProps) => {
+const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay, onTogglePlay, onToggleMute }: HeroProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [started, setStarted] = useState(false);
   const [nearEnd, setNearEnd] = useState(false);
@@ -28,12 +30,15 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay 
 
   const handleStart = () => {
     setStarted(true);
-    // small delay so iframe with autoplay=1 loads — then ensure unmuted & playing
+    // small delay so iframe with autoplay=1 loads — then ensure unmuted & playing in HD
     setTimeout(() => {
       post("unMute");
       post("setVolume", [100]);
       post("playVideo");
+      post("setPlaybackQuality", ["hd1080"]);
     }, 250);
+    setTimeout(() => post("setPlaybackQuality", ["hd1080"]), 1500);
+    setTimeout(() => post("setPlaybackQuality", ["hd1080"]), 3500);
     onUserUnmute?.();
     onUserPlay?.();
   };
@@ -106,11 +111,13 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay 
     fs: "0",
     cc_load_policy: "0",
     enablejsapi: "1",
+    vq: "hd1080",
+    hd: "1",
   }).toString();
 
   return (
     <section
-      className="relative h-screen w-full overflow-hidden bg-background select-none"
+      className="relative h-screen w-full overflow-hidden bg-background select-none group/hero"
       onContextMenu={(e) => e.preventDefault()}
       style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
     >
@@ -118,7 +125,7 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay 
         <div className="absolute inset-0 overflow-hidden">
           <iframe
             ref={iframeRef}
-            src={`https://www.youtube-nocookie.com/embed/${SHOWREEL_ID}?${params}`}
+            src={`https://www.youtube.com/embed/${SHOWREEL_ID}?${params}`}
             title="Sumit Mandre — Showreel"
             allow="autoplay; encrypted-media; picture-in-picture"
             referrerPolicy="strict-origin-when-cross-origin"
@@ -165,6 +172,30 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay 
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Center play/pause control (hover to reveal) */}
+      {started && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-opacity duration-300">
+          <div className="flex items-center gap-4 pointer-events-auto">
+            <button
+              type="button"
+              onClick={onTogglePlay}
+              aria-label={isPlaying ? "Pause" : "Play"}
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm flex items-center justify-center shadow-2xl transition-all hover:scale-105"
+            >
+              {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+            </button>
+            <button
+              type="button"
+              onClick={onToggleMute}
+              aria-label={isMuted ? "Unmute" : "Mute"}
+              className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white flex items-center justify-center transition-colors"
+            >
+              {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Small unobtrusive showreel label */}
       {started && (

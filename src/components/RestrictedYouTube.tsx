@@ -23,6 +23,13 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
     );
   }, []);
 
+  const forceHD = useCallback(() => {
+    send("setPlaybackQuality", ["hd1080"]);
+    // Some clients ignore the first call until playback has begun
+    setTimeout(() => send("setPlaybackQuality", ["hd1080"]), 800);
+    setTimeout(() => send("setPlaybackQuality", ["hd1080"]), 2500);
+  }, [send]);
+
   const togglePlay = useCallback(() => {
     if (isPlaying) {
       send("pauseVideo");
@@ -34,9 +41,10 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
         setIsMuted(false);
       }
       send("playVideo");
+      forceHD();
     }
     setIsPlaying((p) => !p);
-  }, [isPlaying, isMuted, send]);
+  }, [isPlaying, isMuted, send, forceHD]);
 
   const toggleMute = useCallback(() => {
     if (isMuted) send("unMute");
@@ -73,6 +81,19 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
     };
   }, [duration]);
 
+  // If autoplay, kick HD + unmute once the iframe is ready
+  useEffect(() => {
+    if (!autoplay) return;
+    const t1 = setTimeout(() => {
+      send("unMute");
+      send("setVolume", [100]);
+      send("playVideo");
+      forceHD();
+      setIsMuted(false);
+    }, 600);
+    return () => clearTimeout(t1);
+  }, [autoplay, send, forceHD]);
+
   const seek = (pct: number) => {
     if (duration > 0) {
       send("seekTo", [pct * duration, true]);
@@ -100,6 +121,8 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
     cc_load_policy: "0",
     showinfo: "0",
     enablejsapi: "1",
+    vq: "hd1080",
+    hd: "1",
   }).toString();
 
   return (

@@ -1,13 +1,36 @@
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Play, Award } from "lucide-react";
+import { ArrowLeft, Play, Award, Maximize2 } from "lucide-react";
 import { projects } from "@/data/projects";
-import RestrictedYouTube from "@/components/RestrictedYouTube";
+import Lightbox, { type LightboxItem } from "@/components/Lightbox";
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const project = projects.find((p) => p.id === id);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const ids = project?.videoEmbedIds ?? (project?.videoEmbedId ? [project.videoEmbedId] : []);
+  const showVideo = !!project && !project.hideVideo && ids.length > 0;
+  const showExternal = !!project && !project.hideVideo && !ids.length && project.externalUrl;
+  const showStills = !!project && !project.imageSections && project.stills && project.stills.length > 0;
+
+  // Build a unified media list for the lightbox
+  const lightboxItems = useMemo<LightboxItem[]>(() => {
+    if (!project) return [];
+    const items: LightboxItem[] = [];
+    ids.forEach((vid) =>
+      items.push({ type: "video", videoId: vid, title: `${project.title} — clip` })
+    );
+    project.stills?.forEach((src) =>
+      items.push({ type: "image", src, alt: `${project.title} still` })
+    );
+    project.imageSections?.forEach((s) =>
+      s.images.forEach((src) => items.push({ type: "image", src, alt: s.heading }))
+    );
+    return items;
+  }, [project, ids]);
 
   if (!project) {
     return (
@@ -22,10 +45,15 @@ const ProjectDetail = () => {
     );
   }
 
-  const ids = project.videoEmbedIds ?? (project.videoEmbedId ? [project.videoEmbedId] : []);
-  const showVideo = !project.hideVideo && ids.length > 0;
-  const showExternal = !project.hideVideo && !ids.length && project.externalUrl;
-  const showStills = !project.imageSections && project.stills && project.stills.length > 0;
+  // Index helpers based on insertion order above
+  const videoCount = ids.length;
+  const stillsStart = videoCount;
+  let imageSectionStart = stillsStart + (project.stills?.length ?? 0);
+  const sectionIndexBase: number[] = [];
+  project.imageSections?.forEach((s) => {
+    sectionIndexBase.push(imageSectionStart);
+    imageSectionStart += s.images.length;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,7 +83,6 @@ const ProjectDetail = () => {
             <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mt-3">
               {project.title}
             </h1>
-            {/* Highlighted role */}
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/15 border border-primary/40 backdrop-blur-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               <span className="text-primary font-display text-sm md:text-base font-semibold tracking-wide">
@@ -116,7 +143,7 @@ const ProjectDetail = () => {
           </motion.div>
         )}
 
-        {/* Embedded clip(s) */}
+        {/* Embedded clip(s) — click opens fullscreen lightbox */}
         {showVideo && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -126,12 +153,30 @@ const ProjectDetail = () => {
           >
             <h2 className="font-display text-2xl font-semibold">{ids.length > 1 ? "Clips" : "Clip"}</h2>
             <div className={ids.length > 1 ? "grid md:grid-cols-2 gap-4" : ""}>
-              {ids.map((vid) => (
-                <RestrictedYouTube key={vid} videoId={vid} title={`${project.title} — clip`} className="aspect-video rounded-sm" />
+              {ids.map((vid, i) => (
+                <button
+                  type="button"
+                  key={vid}
+                  onClick={() => setLightboxIndex(i)}
+                  className="relative w-full aspect-video bg-black rounded-sm overflow-hidden group"
+                >
+                  <img
+                    src={`https://i.ytimg.com/vi/${vid}/hqdefault.jpg`}
+                    alt={`${project.title} clip ${i + 1}`}
+                    className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/90 group-hover:bg-primary flex items-center justify-center shadow-2xl">
+                      <Play size={28} className="text-primary-foreground ml-1" fill="currentColor" />
+                    </div>
+                  </div>
+                </button>
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
-              Clips embedded for preview only. Not available for download or external embedding.
+              Click to play in fullscreen. Preview only — not available for download.
             </p>
           </motion.div>
         )}
@@ -162,15 +207,23 @@ const ProjectDetail = () => {
             <h2 className="font-display text-2xl font-semibold mb-6">Stills</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
               {project.stills!.map((src, i) => (
-                <div key={i} className="aspect-video rounded-sm overflow-hidden bg-secondary">
+                <button
+                  type="button"
+                  key={i}
+                  onClick={() => setLightboxIndex(stillsStart + i)}
+                  className="relative aspect-video rounded-sm overflow-hidden bg-secondary group"
+                >
                   <img
                     src={src}
                     alt={`${project.title} still ${i + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     loading="lazy"
                     referrerPolicy="no-referrer"
                   />
-                </div>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                    <Maximize2 size={18} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </button>
               ))}
             </div>
           </motion.div>
@@ -179,6 +232,7 @@ const ProjectDetail = () => {
         {/* Image sections (illustrations / cartoons) */}
         {project.imageSections?.map((section, si) => {
           const isCartoonCollage = /cartoon/i.test(section.heading ?? "");
+          const base = sectionIndexBase[si];
           return (
             <motion.div
               key={si}
@@ -192,10 +246,14 @@ const ProjectDetail = () => {
               {section.images.length === 0 ? (
                 <p className="text-muted-foreground text-sm italic">Gallery coming soon.</p>
               ) : isCartoonCollage ? (
-                // Cartoon collage — render at full bleed since it's a single collage image
                 <div className="space-y-4 -mx-6 md:-mx-10">
                   {section.images.map((src, i) => (
-                    <div key={i} className="w-full bg-secondary overflow-hidden">
+                    <button
+                      type="button"
+                      key={i}
+                      onClick={() => setLightboxIndex(base + i)}
+                      className="w-full bg-secondary overflow-hidden block"
+                    >
                       <img
                         src={src}
                         alt={`${section.heading} ${i + 1}`}
@@ -203,21 +261,29 @@ const ProjectDetail = () => {
                         loading="lazy"
                         referrerPolicy="no-referrer"
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                   {section.images.map((src, i) => (
-                    <div key={i} className="aspect-square rounded-sm overflow-hidden bg-secondary">
+                    <button
+                      type="button"
+                      key={i}
+                      onClick={() => setLightboxIndex(base + i)}
+                      className="relative aspect-square rounded-sm overflow-hidden bg-secondary group"
+                    >
                       <img
                         src={src}
                         alt={`${section.heading} ${i + 1}`}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         loading="lazy"
                         referrerPolicy="no-referrer"
                       />
-                    </div>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                        <Maximize2 size={18} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -225,6 +291,13 @@ const ProjectDetail = () => {
           );
         })}
       </div>
+
+      <Lightbox
+        items={lightboxItems}
+        index={lightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+        onIndexChange={setLightboxIndex}
+      />
     </div>
   );
 };
