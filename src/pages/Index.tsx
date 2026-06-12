@@ -32,6 +32,8 @@ const Index = () => {
         onAutoMute={handleAutoMute}
         onUserUnmute={handleUserUnmute}
         onUserPlay={handleUserPlay}
+        onTogglePlay={handleTogglePlay}
+        onToggleMute={handleToggleMute}
       />
       <AboutSection />
       <ProjectsSection />
