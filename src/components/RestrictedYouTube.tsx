@@ -81,6 +81,19 @@ const RestrictedYouTube = ({ videoId, title = "Clip", className = "", autoplay =
     };
   }, [duration]);
 
+  // If autoplay, kick HD + unmute once the iframe is ready
+  useEffect(() => {
+    if (!autoplay) return;
+    const t1 = setTimeout(() => {
+      send("unMute");
+      send("setVolume", [100]);
+      send("playVideo");
+      forceHD();
+      setIsMuted(false);
+    }, 600);
+    return () => clearTimeout(t1);
+  }, [autoplay, send, forceHD]);
+
   const seek = (pct: number) => {
     if (duration > 0) {
       send("seekTo", [pct * duration, true]);
