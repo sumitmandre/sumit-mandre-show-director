@@ -117,7 +117,7 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
 
   return (
     <section
-      className="relative h-screen w-full overflow-hidden bg-background select-none"
+      className="relative h-screen w-full overflow-hidden bg-background select-none group/hero"
       onContextMenu={(e) => e.preventDefault()}
       style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
     >
