@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Play, Headphones } from "lucide-react";
-import showreelAsset from "@/assets/showreel.mp4.asset.json";
 
 interface HeroProps {
   isMuted: boolean;
@@ -13,43 +12,57 @@ interface HeroProps {
   onToggleMute?: () => void;
 }
 
+const SHOWREEL_ID = "AaqIeXqF3J4";
+
 const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay, onTogglePlay }: HeroProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [started, setStarted] = useState(false);
   const [nearEnd, setNearEnd] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
 
-  const handleStart = async () => {
+  const send = useCallback((func: string, args: unknown[] = []) => {
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func, args }),
+      "*"
+    );
+  }, []);
+
+  const forceHD = useCallback(() => {
+    send("setPlaybackQuality", ["hd1080"]);
+    setTimeout(() => send("setPlaybackQuality", ["hd1080"]), 800);
+    setTimeout(() => send("setPlaybackQuality", ["hd1080"]), 2500);
+  }, [send]);
+
+  const handleStart = () => {
     setStarted(true);
-    const v = videoRef.current;
-    if (v) {
-      v.muted = false;
-      v.volume = 1;
-      try {
-        await v.play();
-      } catch {
-        // ignore
-      }
-    }
+    // Give the iframe a tick to mount, then unmute + play
+    setTimeout(() => {
+      send("unMute");
+      send("setVolume", [100]);
+      send("playVideo");
+      forceHD();
+    }, 400);
     onUserUnmute?.();
     onUserPlay?.();
   };
 
-  // Sync external play/mute toggles
+  // Sync external mute toggle
   useEffect(() => {
-    const v = videoRef.current;
-    if (!v || !started) return;
-    v.muted = isMuted;
-    if (!isMuted) v.volume = 1;
-  }, [isMuted, started]);
+    if (!started) return;
+    if (isMuted) send("mute");
+    else {
+      send("unMute");
+      send("setVolume", [100]);
+    }
+  }, [isMuted, started, send]);
 
+  // Sync external play toggle
   useEffect(() => {
-    const v = videoRef.current;
-    if (!v || !started) return;
-    if (isPlaying) v.play().catch(() => {});
-    else v.pause();
-  }, [isPlaying, started]);
+    if (!started) return;
+    if (isPlaying) send("playVideo");
+    else send("pauseVideo");
+  }, [isPlaying, started, send]);
 
   // Auto-mute on scroll past hero
   useEffect(() => {
@@ -61,22 +74,58 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
     return () => window.removeEventListener("scroll", onScroll);
   }, [onAutoMute, started]);
 
-  const onTimeUpdate = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    setCurrentTime(v.currentTime);
-    if (v.duration > 0) {
-      const remaining = v.duration - v.currentTime;
-      setNearEnd(remaining > 0 && remaining < 8);
-    }
-  };
+  // Poll iframe for time/duration
+  useEffect(() => {
+    if (!started) return;
+    const onMsg = (e: MessageEvent) => {
+      if (typeof e.data !== "string") return;
+      try {
+        const data = JSON.parse(e.data);
+        if (data.event === "infoDelivery" && data.info) {
+          if (typeof data.info.duration === "number" && data.info.duration > 0)
+            setDuration(data.info.duration);
+          if (typeof data.info.currentTime === "number") {
+            setCurrentTime(data.info.currentTime);
+            const d = data.info.duration ?? duration;
+            if (d > 0) {
+              const remaining = d - data.info.currentTime;
+              setNearEnd(remaining > 0 && remaining < 8);
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener("message", onMsg);
+    const id = setInterval(() => {
+      iframeRef.current?.contentWindow?.postMessage(
+        JSON.stringify({ event: "listening" }),
+        "*"
+      );
+    }, 500);
+    return () => {
+      window.removeEventListener("message", onMsg);
+      clearInterval(id);
+    };
+  }, [started, duration]);
 
-  const onLoadedMetadata = () => {
-    const v = videoRef.current;
-    if (v && isFinite(v.duration)) setDuration(v.duration);
-  };
-
-  const handleVideoClick = () => onTogglePlay?.();
+  const params = new URLSearchParams({
+    autoplay: "0",
+    mute: "0",
+    controls: "0",
+    rel: "0",
+    modestbranding: "1",
+    playsinline: "1",
+    fs: "0",
+    iv_load_policy: "3",
+    disablekb: "1",
+    cc_load_policy: "0",
+    showinfo: "0",
+    enablejsapi: "1",
+    vq: "hd1080",
+    hd: "1",
+  }).toString();
 
   return (
     <section
@@ -86,33 +135,33 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
     >
       {started && (
         <div className="absolute inset-0 overflow-hidden">
-          <video
-            ref={videoRef}
-            src={showreelAsset.url}
-            onClick={handleVideoClick}
-            onTimeUpdate={onTimeUpdate}
-            onLoadedMetadata={onLoadedMetadata}
-            onContextMenu={(e) => e.preventDefault()}
-            playsInline
-            preload="auto"
-            controls={false}
-            controlsList="nodownload noremoteplayback noplaybackrate nofullscreen"
-            disablePictureInPicture
-            disableRemotePlayback
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore - non-standard attribute supported by some browsers
-            x-webkit-airplay="deny"
-            className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+          <iframe
+            ref={iframeRef}
+            src={`https://www.youtube.com/embed/${SHOWREEL_ID}?${params}`}
+            title="Sumit Mandre — Showreel"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen={false}
+            referrerPolicy="strict-origin-when-cross-origin"
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{
+              width: "100%",
+              height: "100%",
+              transform: "scale(1.35)",
+              transformOrigin: "center",
+            }}
           />
-          {/* Invisible overlay to swallow right-click on top of <video> */}
-          <div
-            className="absolute inset-0 pointer-events-none"
+          {/* Click-anywhere play/pause overlay (also blocks right-click) */}
+          <button
+            type="button"
+            onClick={() => onTogglePlay?.()}
             onContextMenu={(e) => e.preventDefault()}
+            aria-label={isPlaying ? "Pause showreel" : "Play showreel"}
+            className="absolute inset-0 w-full h-full bg-transparent cursor-pointer"
           />
         </div>
       )}
 
-      {/* Start overlay — gives us a real user gesture so audio can play */}
+      {/* Start overlay */}
       <AnimatePresence>
         {!started && (
           <motion.div
@@ -150,7 +199,7 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
         )}
       </AnimatePresence>
 
-      {/* Small unobtrusive showreel label */}
+      {/* Small showreel label */}
       {started && (
         <div className="pointer-events-none absolute bottom-6 left-6 md:bottom-8 md:left-10 z-10">
           <span className="font-display text-[10px] md:text-xs tracking-[0.4em] uppercase text-white/50">
@@ -159,7 +208,7 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
         </div>
       )}
 
-      {/* Scroll down indicator — appears near end of showreel */}
+      {/* Scroll-down near end */}
       {started && (
         <motion.div
           initial={false}
@@ -179,9 +228,9 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
         </motion.div>
       )}
 
-      {/* Minimal time slider — bottom edge */}
+      {/* Minimal slider */}
       {started && duration > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 z-10 px-6 md:px-10 pb-3">
+        <div className="absolute bottom-0 left-0 right-0 z-20 px-6 md:px-10 pb-3">
           <input
             type="range"
             min={0}
@@ -189,11 +238,8 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
             value={Math.round((currentTime / duration) * 1000)}
             onChange={(e) => {
               const pct = Number(e.target.value) / 1000;
-              const v = videoRef.current;
-              if (v) {
-                v.currentTime = pct * duration;
-                setCurrentTime(v.currentTime);
-              }
+              send("seekTo", [pct * duration, true]);
+              setCurrentTime(pct * duration);
             }}
             onClick={(e) => e.stopPropagation()}
             aria-label="Showreel progress"
