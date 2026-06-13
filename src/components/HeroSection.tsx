@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Play, Pause, Headphones, Volume2, VolumeX } from "lucide-react";
+import { ChevronDown, Play, Headphones } from "lucide-react";
+import showreelAsset from "@/assets/showreel.mp4.asset.json";
 
 interface HeroProps {
   isMuted: boolean;
@@ -12,126 +13,102 @@ interface HeroProps {
   onToggleMute?: () => void;
 }
 
-const SHOWREEL_ID = "O4gjv779n68";
-
-const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay, onTogglePlay, onToggleMute }: HeroProps) => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay, onTogglePlay }: HeroProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [started, setStarted] = useState(false);
   const [nearEnd, setNearEnd] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const durationRef = useRef<number>(0);
 
-  const post = (func: string, args: unknown[] = []) =>
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: "command", func, args }),
-      "*"
-    );
-
-  const handleStart = () => {
+  const handleStart = async () => {
     setStarted(true);
-    // small delay so iframe with autoplay=1 loads — then ensure unmuted & playing in HD
-    setTimeout(() => {
-      post("unMute");
-      post("setVolume", [100]);
-      post("playVideo");
-      post("setPlaybackQuality", ["hd1080"]);
-    }, 250);
-    setTimeout(() => post("setPlaybackQuality", ["hd1080"]), 1500);
-    setTimeout(() => post("setPlaybackQuality", ["hd1080"]), 3500);
+    const v = videoRef.current;
+    if (v) {
+      v.muted = false;
+      v.volume = 1;
+      try {
+        await v.play();
+      } catch {
+        // ignore
+      }
+    }
     onUserUnmute?.();
     onUserPlay?.();
   };
 
+  // Sync external play/mute toggles
   useEffect(() => {
-    if (!started) return;
-    const handleScroll = () => {
-      if (window.scrollY > window.innerHeight * 0.3) onAutoMute();
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [onAutoMute, started]);
-
-  useEffect(() => {
-    if (!started) return;
-    post(isMuted ? "mute" : "unMute");
-    if (!isMuted) post("setVolume", [100]);
+    const v = videoRef.current;
+    if (!v || !started) return;
+    v.muted = isMuted;
+    if (!isMuted) v.volume = 1;
   }, [isMuted, started]);
 
   useEffect(() => {
-    if (!started) return;
-    post(isPlaying ? "playVideo" : "pauseVideo");
+    const v = videoRef.current;
+    if (!v || !started) return;
+    if (isPlaying) v.play().catch(() => {});
+    else v.pause();
   }, [isPlaying, started]);
 
+  // Auto-mute on scroll past hero
   useEffect(() => {
     if (!started) return;
-    const onMsg = (e: MessageEvent) => {
-      if (typeof e.data !== "string") return;
-      try {
-        const data = JSON.parse(e.data);
-        if (data.event === "infoDelivery" && data.info) {
-          if (typeof data.info.duration === "number" && data.info.duration > 0) {
-            durationRef.current = data.info.duration;
-            setDuration(data.info.duration);
-          }
-          if (typeof data.info.currentTime === "number" && durationRef.current > 0) {
-            setCurrentTime(data.info.currentTime);
-            const remaining = durationRef.current - data.info.currentTime;
-            setNearEnd(remaining > 0 && remaining < 8);
-          }
-        }
-      } catch {
-        // ignore
-      }
+    const onScroll = () => {
+      if (window.scrollY > window.innerHeight * 0.3) onAutoMute();
     };
-    window.addEventListener("message", onMsg);
-    const id = setInterval(() => {
-      iframeRef.current?.contentWindow?.postMessage(
-        JSON.stringify({ event: "listening" }),
-        "*"
-      );
-    }, 1000);
-    return () => {
-      window.removeEventListener("message", onMsg);
-      clearInterval(id);
-    };
-  }, [started]);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [onAutoMute, started]);
 
-  const params = new URLSearchParams({
-    autoplay: "1",
-    mute: "0",
-    controls: "0",
-    loop: "1",
-    playlist: SHOWREEL_ID,
-    playsinline: "1",
-    modestbranding: "1",
-    rel: "0",
-    iv_load_policy: "3",
-    disablekb: "1",
-    fs: "0",
-    cc_load_policy: "0",
-    enablejsapi: "1",
-    vq: "hd1080",
-    hd: "1",
-  }).toString();
+  const onTimeUpdate = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    setCurrentTime(v.currentTime);
+    if (v.duration > 0) {
+      const remaining = v.duration - v.currentTime;
+      setNearEnd(remaining > 0 && remaining < 8);
+    }
+  };
+
+  const onLoadedMetadata = () => {
+    const v = videoRef.current;
+    if (v && isFinite(v.duration)) setDuration(v.duration);
+  };
+
+  const handleVideoClick = () => onTogglePlay?.();
 
   return (
     <section
-      className="relative h-screen w-full overflow-hidden bg-background select-none group/hero"
+      className="relative h-screen w-full overflow-hidden bg-background select-none"
       onContextMenu={(e) => e.preventDefault()}
       style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
     >
       {started && (
         <div className="absolute inset-0 overflow-hidden">
-          <iframe
-            ref={iframeRef}
-            src={`https://www.youtube.com/embed/${SHOWREEL_ID}?${params}`}
-            title="Sumit Mandre — Showreel"
-            allow="autoplay; encrypted-media; picture-in-picture"
-            referrerPolicy="strict-origin-when-cross-origin"
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.78vh] h-[56.25vw] min-w-full min-h-full pointer-events-none"
+          <video
+            ref={videoRef}
+            src={showreelAsset.url}
+            onClick={handleVideoClick}
+            onTimeUpdate={onTimeUpdate}
+            onLoadedMetadata={onLoadedMetadata}
+            onContextMenu={(e) => e.preventDefault()}
+            playsInline
+            preload="auto"
+            controls={false}
+            controlsList="nodownload noremoteplayback noplaybackrate nofullscreen"
+            disablePictureInPicture
+            disableRemotePlayback
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore - non-standard attribute supported by some browsers
+            x-webkit-airplay="deny"
+            className="absolute inset-0 w-full h-full object-cover cursor-pointer"
           />
-          <div className="absolute inset-0" onContextMenu={(e) => e.preventDefault()} />
+          {/* Invisible overlay to swallow right-click on top of <video> */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            onContextMenu={(e) => e.preventDefault()}
+          />
         </div>
       )}
 
@@ -173,30 +150,6 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
         )}
       </AnimatePresence>
 
-      {/* Center play/pause control (hover to reveal) */}
-      {started && (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-opacity duration-300">
-          <div className="flex items-center gap-4 pointer-events-auto">
-            <button
-              type="button"
-              onClick={onTogglePlay}
-              aria-label={isPlaying ? "Pause" : "Play"}
-              className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm flex items-center justify-center shadow-2xl transition-all hover:scale-105"
-            >
-              {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
-            </button>
-            <button
-              type="button"
-              onClick={onToggleMute}
-              aria-label={isMuted ? "Unmute" : "Mute"}
-              className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white flex items-center justify-center transition-colors"
-            >
-              {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Small unobtrusive showreel label */}
       {started && (
         <div className="pointer-events-none absolute bottom-6 left-6 md:bottom-8 md:left-10 z-10">
@@ -226,24 +179,23 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
         </motion.div>
       )}
 
-      {/* Minimal progress slider — bottom edge */}
-      {started && (
+      {/* Minimal time slider — bottom edge */}
+      {started && duration > 0 && (
         <div className="absolute bottom-0 left-0 right-0 z-10 px-6 md:px-10 pb-3">
           <input
             type="range"
             min={0}
             max={1000}
-            value={duration > 0 ? Math.round((currentTime / duration) * 1000) : 0}
+            value={Math.round((currentTime / duration) * 1000)}
             onChange={(e) => {
               const pct = Number(e.target.value) / 1000;
-              if (duration > 0) {
-                iframeRef.current?.contentWindow?.postMessage(
-                  JSON.stringify({ event: "command", func: "seekTo", args: [pct * duration, true] }),
-                  "*"
-                );
-                setCurrentTime(pct * duration);
+              const v = videoRef.current;
+              if (v) {
+                v.currentTime = pct * duration;
+                setCurrentTime(v.currentTime);
               }
             }}
+            onClick={(e) => e.stopPropagation()}
             aria-label="Showreel progress"
             className="w-full h-[2px] appearance-none bg-white/15 rounded-full cursor-pointer
               [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2
@@ -252,9 +204,9 @@ const HeroSection = ({ isMuted, isPlaying, onAutoMute, onUserUnmute, onUserPlay,
               [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
             style={{
               background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${
-                duration > 0 ? (currentTime / duration) * 100 : 0
+                (currentTime / duration) * 100
               }%, rgba(255,255,255,0.15) ${
-                duration > 0 ? (currentTime / duration) * 100 : 0
+                (currentTime / duration) * 100
               }%, rgba(255,255,255,0.15) 100%)`,
             }}
           />
