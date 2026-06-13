@@ -289,7 +289,7 @@ export const projects: Project[] = [
           "1FCdus61CS1t6f48jvzkRNDmEqG8rIb0r",
           "1r4Y-4FhB-Em9mI_EVzOC9ygaBagtvpQn",
           "11CJ_M8fP5mDV-r4qtfDvWI4QaWS3mEBi",
-        ].map((id) => `${dt(id)}&v=2`),
+        ].map((id) => `${dt(id)}&v=3`),
       },
       {
         heading: "Illustrations",
